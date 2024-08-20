@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Agent</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/enterprise-view" class="home-icon" data-tippy-content="Returns to view of organization"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>IT Ticket Assignment</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <main class="container">
+        <div class="row justify-content-center">
+            <div class="card col-md-8">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>Make Client an Agent</h4>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to make <strong th:text="${client.name}"></strong> an agent?</p>
+                    <form action="/confirm-make-agent" method="post" data-tippy-content="">
+                        <input type="hidden" name="clientId" th:value="${client.id}">
+                        
+                        <div class="form-group">
+                            <label for="roleId">Select Role:</label>
+                            <select class="form-control" id="roleId" name="roleId">
+                                <option value="">Select Role</option>
+                                <!-- Iterate over roles to populate options -->
+                                <th:block th:each="role : ${roles}">
+                                    <option th:value="${role.id}" th:text="${role.roleName}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-danger">Confirm</button>
+                            <a href="/enterprise-view" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

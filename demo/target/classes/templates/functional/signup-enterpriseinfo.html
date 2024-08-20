@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enroll New Enterprise</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/" class="home-icon"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>IT Ticket Assignment</h1>
+        </div>
+        </div>
+    <div class="container mt-5">
+        <h2>Enroll New Enterprise</h2>
+
+        <!-- Display success or error messages if they exist -->
+          <!-- Display error message if it exists -->
+          <div class="alert alert-danger" role="alert" th:if="${errorMessage}">
+            <p th:text="${errorMessage}"></p>
+            <a href="/enroll-enterprise" class="btn btn-warning btn-block">Enroll New Enterprise</a>
+        </div>
+
+        <form action="/signup-enterpriseinfo" method="post">
+            <div class="form-group">
+                <label for="enterpriseName">Enterprise Name</label>
+                <input type="text" class="form-control" id="enterprise" name="enterprise" placeholder="Enter enterprise name" required>
+            </div>
+            <div class="form-group">
+                <label for="branchNumber">Branch Number</label>
+                <input type="text" class="form-control" id="branchNumber" name="branchNumber" placeholder="Enter branch number">
+            </div>
+            <div class="form-group">
+                <label for="department">Department</label>
+                <input type="text" class="form-control" id="department" name="department" placeholder="Department" required>
+            </div>
+            <div class="form-group">
+                <label for="position">Position</label>
+                <input type="text" class="form-control" id="position" name="position" placeholder="Position" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Enroll</button>
+        </form>
+    </div>
+</body>
+</html>

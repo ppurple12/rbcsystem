@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise View</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin-bottom: 5px;
+        }
+
+        .role-link {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .role-link:hover {
+            color: #007bff;
+        }
+
+                /* Update the ticket-info-box class */
+        .ticket-info-box {
+            width: calc(33.33% - 30px); /* Adjust the width to fit three boxes per row */
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* Add styling for the container holding the boxes */
+        .role-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between; /* To evenly distribute boxes in three columns */
+        }
+
+        .client-info-list {
+            list-style-type: none;
+            margin-top: 5px;
+            padding-left: 0;
+        }
+
+        .client-info-list li {
+            margin-bottom: 3px;
+            cursor: pointer; /* Add cursor pointer to indicate clickable */
+        }
+
+        .quantity-input {
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon " data-tippy-content="Redirects to dashboard"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Enterprise View</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <form id="role-selection-form">
+            <div class="card-header">
+                <h4 class="text-center">Pick necessary roles</h4>
+            </div>
+            <div class="card-body role-container" data-tippy-content="Pick roles and amount of specified roles needed to accomplish task"> <!-- Add the role-container class here -->
+                <!-- Populate roles here -->
+                <!-- Loop through roles -->
+                <th:block th:each="role, iterStat : ${roles}">
+                    <div class="ticket-info-box">
+                        <h3 class="subject" th:text="${role.roleName}">Role</h3>
+                        <ul class="client-info-list">
+                            <!-- Client information will be populated here -->
+                        </ul>
+                        <div class="quantity-input">
+                            <label for="quantity" class="role-quantity-label">Quantity:</label>
+                            <input type="number" name="quantity" class="role-quantity-input" min="0" value="0">
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+            <div class="text-center">
+                <button type="button" id="submit-button" class="btn btn-secondary">Submit</button>
+            </div>
+        </form>
+    </div>
+    
+
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+         $(document).ready(function() {
+            // Handle form submission
+            $('#submit-button').click(function() {
+                var roleAmounts = [];
+                $('.role-quantity-input').each(function() {
+                    roleAmounts.push(parseInt($(this).val()));
+                });
+                // Send role amounts to the server
+                $.ajax({
+                    type: 'POST',
+                    url: '/role-specification',
+                    data: JSON.stringify(roleAmounts),
+                    contentType: 'application/json',
+                    success: function(data) {
+                        console.log("Role amounts submitted successfully.");
+                        window.location.href = "/assignment-visualization"; // Redirect to the visualization page
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error submitting role amounts:", error);
+                        // Handle error if needed
+                    }
+                });
+            });
+         });
+    </script>
+</body>
+</html>

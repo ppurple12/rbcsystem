@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Change</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .agent-item:hover {
+            background-color: lightgray;
+            cursor: pointer;
+        }
+
+        p {
+            color: #202020;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon" data-tippy-content="Redirects to dashboard"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Agent Change</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <h2>Agent Change</h2>
+        <form action="/addRole" method="post" data-tippy-content="A role may be added to an agent, granted it has no previously been assigned and that it is properly scaled 1-10">
+            <div class="form-group">
+                <input type="hidden" name="agentId" th:value="${agent.id}">
+                <label for="roleSelect">Select Role and Ability:</label>
+                <select class="form-control" id="roleSelect" name="roleId">
+                    <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.roleName}"></option>
+                </select><br>
+                <select class="form-control" id="abilitySelect" name="ability">
+                    <option th:each="i : ${#numbers.sequence(1, 10)}" th:value="${i}" th:text="${i}"></option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" onclick="return confirmSubmit()">Add Role</button>
+        </form>
+        <hr>
+        <h3>Current Roles:</h3>
+        <ul id="agentList" data-tippy-content="A role can be removed from an agent if they are no longer qualified for it">
+            <li th:each="role, index : ${roles}">
+                <span th:text="${role.roleName}"></span>
+                <button class="btn btn-danger" th:attr="onclick='removeRole(' + ${role.id} + ',' + ${agent.id} + ')'" type="button" >Remove</button>
+                <p></p>
+            </li>
+            <li th:unless="${roles != null and not #lists.isEmpty(roles)}">No roles found.</li>
+        </ul>
+    </div>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+        function removeRole(roleId, agentId) {
+            if (confirm("Are you sure you want to remove this role?")) {
+                fetch("/removeRole", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: `roleId=${roleId}&agentId=${agentId}`
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    window.location.reload();
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        }
+
+        function confirmSubmit() {
+            return confirm("Are you sure you want to submit?");
+        }
+    </script>
+</body>
+</html>

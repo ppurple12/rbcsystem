@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    
+    <html xmlns:th="http://www.thymeleaf.org"></html>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Style the form container */
+        .form-container {
+            width: 100%; /* Make the form container responsive */
+            max-width: 400px; /* Limit the maximum width */
+            margin: 0 auto; /* Center the form horizontally */
+            padding: 20px; /* Add some padding */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+            border-radius: 5px; /* Add rounded corners */
+        }
+
+        /* Style form elements */
+        .form-container form {
+            display: flex; /* Use flexbox to align form elements */
+            flex-direction: column; /* Align form elements vertically */
+            align-items: center; /* Center form elements horizontally */
+        }
+
+        /* Style form inputs */
+        .form-container form input,
+        .form-container form select,
+        .form-container form textarea {
+            width: 100%; /* Make inputs fill the container */
+            padding: 10px; /* Add some padding */
+            margin: 5px 0; /* Add space between form elements */
+            border: 1px solid #ccc; /* Add a border */
+            border-radius: 3px; /* Add rounded corners */
+            box-sizing: border-box; /* Ensure padding doesn't affect width */
+        }
+
+        /* Style form labels */
+        .form-container form label {
+            margin-bottom: 5px; /* Add space below labels */
+            font-weight: bold; /* Make labels bold */
+        }
+
+        /* Style form buttons */
+        .form-container form button {
+            width: 100%; /* Make buttons fill the container */
+            padding: 10px; /* Add some padding */
+            margin-top: 10px; /* Add space above buttons */
+            background-color: #007bff; /* Set button background color */
+            color: #fff; /* Set text color to white */
+            border: none; /* Remove border */
+            border-radius: 3px; /* Add rounded corners */
+            cursor: pointer; /* Add pointer cursor on hover */
+            transition: background-color 0.3s; /* Smooth transition */
+        }
+
+        /* Style form buttons on hover */
+        .form-container form button:hover {
+            background-color: #0056b3; /* Darken the background color */
+        }
+
+        /* Style error messages */
+        .error-message {
+            color: #dc3545; /* Set text color to red */
+            font-size: 14px; /* Set font size */
+            margin-top: 5px; /* Add space above error messages */
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+</body>
+</html><body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon" data-tippy-content="Returns to dashboard">
+                <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90">
+            </a>
+            <h1>IT Ticket Assignment</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <div class="form-container">
+            <form th:action="@{/write-ticket}" th:object="${ticket}" method="post" data-tippy-content="Create an incident report for your issue. Make sure to include any necessary information in the description field">
+                <h2>Write an Incident Report</h2>
+                <input type="hidden" id="clientId" name="clientId" th:value="${loggedInClientId}" />
+
+                <label for="subject">Subject Line</label>
+                <textarea id="subject" th:field="*{subject}" required rows="1" style="resize: none;"></textarea>
+
+                <label for="category">Category</label>
+                <select id="category" th:field="*{category}" onchange="loadSubcategories()">
+                    <option value="">Select Category</option>
+                    <option th:if="${#lists.isEmpty(categories)}" value="" disabled>No categories available</option>
+                    <option th:each="category : ${categories}" th:value="${category}" th:text="${category}"></option>
+                </select>
+                
+                <label for="subcategory">Subcategory</label>
+                <select id="subcategory" th:field="*{subcategory}" onchange="checkFormValidity()">
+                    <option value="">Select Subcategory</option>
+                </select>
+                <label for="issueDescription">Issue Description</label>
+                <textarea id="issueDescription" th:field="*{issueDescription}"></textarea>
+                
+                
+                <p id="error-message" style="color: red;"></p>
+                
+                <button type="submit" id="submit-button" disabled>Submit</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+            const submitButton = document.getElementById('submit-button');
+            const errorMessage = document.getElementById('error-message');
+            const categorySelect = document.getElementById('category');
+            const subcategorySelect = document.getElementById('subcategory');
+
+            // Enable submit button if categories are present
+            if (categorySelect.options.length > 1) {
+                checkFormValidity();
+            } else {
+                errorMessage.textContent = "No categories available. You cannot submit a ticket.";
+                submitButton.disabled = true;
+            }
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+
+        function loadSubcategories() {
+            var category = document.getElementById("category").value;
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/subcategories?category=" + category, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var subcategories = JSON.parse(xhr.responseText);
+                    var subcategorySelect = document.getElementById("subcategory");
+                    subcategorySelect.innerHTML = "";
+                    if (subcategories.length === 0) {
+                        var option = document.createElement("option");
+                        option.value = "";
+                        option.text = "No subcategories available";
+                        option.disabled = true;
+                        subcategorySelect.appendChild(option);
+                        document.getElementById('submit-button').disabled = true;
+                        document.getElementById('error-message').textContent = "No subcategories available. You cannot submit a ticket.";
+                    } else {
+                        for (var i = 0; i < subcategories.length; i++) {
+                            var option = document.createElement("option");
+                            option.value = subcategories[i];
+                            option.text = subcategories[i];
+                            subcategorySelect.appendChild(option);
+                        }
+                        checkFormValidity();
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        function checkFormValidity() {
+            const categoryValue = document.getElementById("category").value;
+            const subcategoryValue = document.getElementById("subcategory").value;
+            const submitButton = document.getElementById("submit-button");
+            const errorMessage = document.getElementById("error-message");
+
+            if (categoryValue !== "" && subcategoryValue !== "") {
+                submitButton.disabled = false;
+                errorMessage.textContent = "";
+            } else {
+                submitButton.disabled = true;
+                if (categoryValue === "") {
+                    errorMessage.textContent = "Please select a category.";
+                } else if (subcategoryValue === "") {
+                    errorMessage.textContent = "Please select a subcategory.";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

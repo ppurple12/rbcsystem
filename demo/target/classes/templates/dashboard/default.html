@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        
+        .view-detail {
+            text-decoration: none;
+            color: #707172;
+            display: inline-block;
+            margin-top: 10px;
+            transition: text-decoration 0.3s ease;
+        }
+        .view-detail:hover {
+            text-decoration: underline;
+        }
+        .ticket-info-box {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .ticket-info-box h3 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+        .ticket-info-box p {
+            margin: 5px 0;
+        }
+        .ticket-info-box .subject {
+            font-weight: bold;
+        }
+        .ticket-info-box .client {
+            color: #555;
+        }
+        .ticket-info-box .time {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a class="home-icon"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Dashboard</h1>
+        </div>
+        <div class="navbar">
+            <a href="/dashboard/profile" data-tippy-content="Directs you to your profile page">Profile</a>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <h2>Welcome to your Dashboard!</h2>
+        <p>From your Dashboard, you can do the following:</p>
+        <ul>
+            <li>Start a new ticket</li>
+            <li>View your active tickets</li>
+            <li>Browse the knowledge base</li>
+        </ul>
+        <div class="button-container">
+            <a href="/write-ticket" class="btn" data-tippy-content="Guides you through the process of creating a ticket">Start a Ticket</a>
+        </div>
+        
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            
+    
+            <div class="card-header bg-primary text-white">
+                <h4 class="text-center">Your Active Tickets</h4>
+            </div>
+        </div>
+        <div class="card-body" data-tippy-content="All active tickets you've created can be found here, clicking will provide a detailed view of them">
+            <div class="ticket-container">
+                <div th:if="${activeTickets != null}" class="ticket-flex-container">
+                    <div th:each="ticket, iterStat : ${activeTickets}" th:if="${iterStat.index < 8}">
+                        <!-- Anchor tag for clickable square -->
+                        <a th:href="@{'/tickets/' + ${ticket.id}}" class="ticket-link">
+                            <div class="ticket-info-box">
+                                <h3 class="subject" th:text="${ticket.subject}">Subject Line</h3>
+                                <p class="client">Client: <span th:text="${ticket.sender.name}">Client Name</span></p>
+                                <p class="time"> </p> Created: <span th:text="${ticket.formattedCreatedAt}"></span></p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="card-body" th:if="${activeTickets.size() > 8}">
+                        <a th:href="@{'/all-tickets-per-client/' + ${client.id}}" class="view-detail">View all tickets...</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div th:if="${activeTickets == null || activeTickets.isEmpty()}">
+                        <p>No active tickets</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <!-- Your custom stylesheet -->
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .overview {
+            display: flex;
+            justify-content: space-evenly;
+        }
+
+        .overview-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .overview-subtitle {
+            font-weight: bold;
+        }
+
+        .overview-value {
+            font-size: 45px;
+        }
+
+        .ticket-info-box {
+            text-align: center;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a class="home-icon"><img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Dashboard</h1>
+        </div>
+        <div class="navbar">
+            <a href="/statistics" data-tippy-content="Shows visual example of statistics">Performance</a>
+            <a href="/dashboard/profile" data-tippy-content="Directs to profile">Profile</a>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <h2>Welcome to your Dashboard!</h2>
+        <p>Here is an overview of your tasks:</p>
+        <div class="overview">
+            <div class="overview-item">
+                <div class="overview-subtitle">Active tickets</div>
+                <div class="overview-value" th:text="${ticketAmt}">0</div>
+            </div>
+            <div class="overview-item">
+                <div class="overview-subtitle">Estimated completion time (hours)</div>
+                <div class="overview-value" th:text="${estimatedCompletionTime}">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="text-center">
+            <div th:if="${newTickets != null and not #lists.isEmpty(newTickets)}">
+                <p><strong>New tickets have been assigned to you</strong></p>
+                <a href="/new-tickets" class="btn" data-tippy-content="Shows new or newly updated tickets that are relaed to you">View Tickets</a>
+            </div>
+            <div th:if="${newTickets == null or #lists.isEmpty(newTickets)}">
+                <p>No new tickets assigned</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="card-header bg-primary text-white">
+                <h4 class="text-center">Tickets</h4>
+                <p>Below you'll find all the active tickets</p>
+            </div>
+            <div class="card-body" data-tippy-content="Shows current active tickets. Can be selected for more detailed view">
+                <div class="ticket-container">
+                    <div th:if="${activeTickets != null and not activeTickets.isEmpty()}" class="ticket-flex-container">
+                        <div th:each="ticket, iterStat : ${activeTickets}" th:if="${iterStat.index < 8}">
+                            <div class="ticket-item">
+                                <div th:with="ticketMap=${ticketMaps[ticket.id]}">
+                                    <div class="ticket-info-box" th:if="${ticketMap.ticketStatus.name()  == 'NEW'}">
+                                        <div class="new-ticket"></div>
+                                    </div>
+                                    <a th:href="@{'/tickets/' + ${ticket.id}}" class="ticket-link">
+                                        <div class="ticket-info-box">
+                                            <h3 class="subject" th:text="${ticket.subject}">Subject Line</h3>
+                                            <p class="client">Client: <span th:text="${ticket.sender.name}">Client Name</span></p>
+                                            <p class="time">
+                                                Completion: <span th:text="${ticket.formatTime()}"></span>
+                                            </p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body" th:if="${activeTickets.size() > 8}">
+                        <a th:href="@{'/agents/' + ${loggedInAgent.id} + '/all-tickets-per-agent'}" class="view-detail">View all tickets...</a>
+                    </div>
+                    <div th:if="${ticketMaps == null or ticketMaps.isEmpty()}">
+                        <p>No active tickets</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agents</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Agents</h1>
+        </div>
+    </div>
+    
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="card-header bg-primary text-white">
+                <h4 class="text-center">Agents</h4>
+                <p>Below you'll find all the agents as well as their amount of tickets</p>
+            </div>
+            <div class="ticket-container">
+                <div th:if="${agents != null}" class="ticket-flex-container">
+                    <div th:each="agent, iterStat : ${agents}" >
+                        <a th:href="@{'/agents/' + ${agent.id}}" class="ticket-link">
+                            <div class="ticket-info-box" data-tippy-content="Provides a detailed view of agent">
+                                <h3 class="agent" th:text="${agent.user.name}">Agent Name</h3>
+                                <p class="ticket-count"><span th:text="${agent.ticketCount}">0</span></p>
+                               <!--  <p class="time">Estimated Time: <span th:text="${agent.totalEstimatedTime}">0</span> hours</p> -->
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div th:if="${agents == null || agents.isEmpty()}">
+                    <p>No active agents</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon" data-tippy-content="Directs towards view of organization"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>IT Ticket Assignment</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="card col-md-8">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center">Agent Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <p><strong>Name:</strong> <span th:text="${agent.user.name}"></span></p>
+                        <p><strong>Number of tickets:</strong> <span th:text="${agent.ticketCount}"></span></p>
+                        <p><strong>Estimated time to complete:</strong> <span th:text="${num}"></span> hours </p>
+                    </div>
+                    <div class="text-center">
+                        <a href="/dashboard/manager" class="btn btn-primary" data-tippy-content="Guides back to the dashboard">Back to Dashboard</a>
+                        <form id="remove-agent-form" action="/remove-agent" method="post" style="display: inline;" data-tippy-content="Begins process of removing agent">
+                            <input type="hidden" id="agentId" name="agentId" th:value="${agent.id}">
+                            <button type="button" class="btn btn-primary" onclick="submitFormWithAgentId(this)">Delete Agent</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="card-body">
+            <div class="ticket-container">
+                <div class="mb-4">
+                    <h5>Abilities</h5>
+                    <div class="row">
+                        <div class="col">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Role</th>
+                                        <th>Ability</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="ability, iterStat : ${abilities}" th:if="${ability > 0} and ${iterStat.index % 2 == 0}">
+                                        <td th:text="${roles[iterStat.index]}"></td>
+                                        <td th:text="${ability}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Role</th>
+                                        <th>Ability</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="ability, iterStat : ${abilities}" th:if="${ability > 0} and ${iterStat.index % 2 != 0}">
+                                        <td th:text="${roles[iterStat.index]}"></td>
+                                        <td th:text="${ability}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <a th:href="@{'/manage-stats/' + ${agent.id}}" class="btn btn-primary" data-tippy-content="Allows the changing of agents' abilities">Change Statistics </a>
+                        <a th:href="@{'/modify-roles/' + ${agent.id}}" class="btn btn-primary" data-tippy-content="Directs towards the adding of a new ability">Add or remove role</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="card-body">
+            <div class="ticket-container">
+                <div th:if="${activeTickets != null}" class="ticket-flex-container">
+                    <div th:each="ticket, iterStat : ${activeTickets}" th:if="${iterStat.index < 8}">
+                        <a th:href="@{'/tickets/' + ${ticket.id}}" class="ticket-link">
+                            <div class="ticket-info-box" data-tippy-content="Points to a more detailed view of the tickets">
+                                <h3 class="subject" th:text="${ticket.subject}">Subject Line</h3>
+                                <p class="client">Client: <span th:text="${ticket.sender.name}">Client Name</span></p>
+                                <p class="time">
+                                    Completion: <span th:text="${ticket.formatTime()}"></span>
+                                </p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="card-body" th:if="${activeTickets.size() > 8}">
+                        <a th:href="@{'/agents/' + ${agent.id} + '/all-tickets-per-agent'}" class="view-detail">View all tickets...</a>
+                    </div>
+                </div>
+                <div th:if="${activeTickets == null || activeTickets.isEmpty()}">
+                    <p>No active tickets</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+
+        function submitFormWithAgentId() {
+            const agentId = document.getElementById('agentId').value;
+            $.post("/remove-agent", { agentId: agentId }, function (response) {
+                alert(response.message); // Display success or error message
+                if (response.success) {
+                    // Optional: Handle UI changes upon successful deletion
+                    console.log('Agent successfully removed');
+                    // Example: Redirect to another page or reload current page
+                    window.location.href = "/dashboard/manager";
+                } else {
+                    console.error('Failed to remove agent:', response.message);
+                }
+            }).fail(function (xhr, status, error) {
+                console.error('Error while removing agent:', error);
+                alert('Failed to remove agent: ' + xhr.responseText);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/" class="home-icon"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>IT Ticket Assignment</h1>
+        </div>
+    </div>
+    <form action="/signup" method="post">
+    
+        <div class="row justify-content-center">
+            <div class="col-md-6 login-container">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="text-center">Sign up</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="username">Full Name</label>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter email">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirm" name="confirm" placeholder="Confirm Password">
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary btn-block">Sign up</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </form>
+</body>
+</html>

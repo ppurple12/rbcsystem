@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+
+    <!-- Custom Styles -->
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 40px auto 0;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive Form Styling */
+        @media (max-width: 576px) {
+            .container {
+                margin-top: 10px;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/" class="home-icon"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>IT Ticket Assignment</h1>
+        </div>
+    </div>
+    <div class="container">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="text-center">Login</h4>
+            </div>
+            <div class="card-body">
+                <!-- Error Messages -->
+                <div th:if="${param.error}" class="alert alert-danger">
+                    Invalid email or password.
+                </div>
+                <div th:if="${param.logout}" class="alert alert-info">
+                    You have been logged out.
+                </div>
+                <!-- Login Form -->
+                <form th:action="@{/login}" method="post">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="Email" required >
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <input type="submit" value="Log in" class="btn btn-primary"/>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

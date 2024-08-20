@@ -1,0 +1,386 @@
+.header {
+    background-color: #007bff;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px; /* Add padding for spacing */
+    margin-bottom: 20px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.home-icon {
+    color: #ffffff;
+    font-size: 34px;
+    margin-right: 10px;
+}
+
+.navbar {
+    display: flex;
+}
+
+.navbar a {
+    display: inline-block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 20px 26px;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    background-color: #ddd;
+    color: black;
+}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #3b3f44;
+}
+
+.container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-container {
+    max-width: 500px;
+    margin-top: 100px;
+}
+
+h1 {
+    font-family: Garamond, Serif;
+    color: #ffffff;
+    font-size: 50px;
+    margin: 0;
+}
+
+p {
+    color: #666666;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn {
+    display: inline-block;
+    margin: 0 10px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 1px;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+.card {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+}
+
+.ticket-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.ticket-link {
+    display: inline-block;
+    width: 150px;
+    height: 150px;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid #ccc;
+    margin: 10px;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+.ticket-link:hover {
+    background-color: #f0f0f0;
+}
+
+.ticket-flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Adjust the gap as needed */
+    justify-content: flex-start; /* Align items to the start */
+}
+
+
+
+.ticket-info-box {
+    background-color: #f9f9f9;
+    
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.subject {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.client{
+    font-size: 15px;
+    
+}
+
+.time{
+    font-size: 10px;
+    margin: 5px 0;
+}
+.row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.card-header {
+    width: 100%;
+    padding: 10px;
+    border-bottom: 1px solid #007bff;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.ticket-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.ticket-box {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin: 10px;
+    
+    width: calc(33.333% - 40px);
+    box-sizing: border-box;
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+.ticket-box:hover {
+    transform: translateY(-5px);
+}
+
+.ticket-info-box {
+    text-align: center;
+}
+
+
+
+.agent {
+    font-size: 18px;
+    
+    color: #333;
+}
+
+.ticket-count {
+    font-size: 34px;
+    font-weight: bold;
+    color: #000407;
+    margin-top: 0px;
+}
+
+.button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+.text-center {
+    text-align: center; /* Center-align the content */
+}
+
+.view-detail {
+    text-decoration: none;
+    color: #707172;
+    display: inline-block;
+    margin-top: 10px;
+    transition: text-decoration 0.3s ease;
+}
+.view-detail:hover {
+    text-decoration: underline;
+}
+
+
+
+
+.new-ticket {
+    position: relative;
+}
+
+.new-ticket {
+    position: absolute; /* Position the circle absolutely */
+    top: 5px; /* Adjust the top position */
+    left: 5px; /* Adjust the right position */
+    width: 20px; /* Adjust the width of the circle */
+    height: 20px; /* Adjust the height of the circle */
+    background-color: #007bff; /* Change the color of the circle */
+    border-radius: 50%; /* Make the circle shape */
+    display: inline-block; /* Ensure the circle behaves as an inline-block element */
+}
+.update-log-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid  #707172;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+}
+.update-log {
+    margin-bottom: 0px;
+    display: flex;
+    align-items: flex-start;
+}
+.update-log-content {
+    background-color: #e9ecef;
+    padding: 0px;
+    border-radius: 0px;
+    max-width: 95%;
+    word-wrap: break-word;
+    
+}
+.update-log-content .name {
+    font-weight: bold;
+    font-size: 0.95em;
+    
+    
+}
+.update-log-content .message {
+    font-size: 0.85em;
+    
+    
+}
+.update-log-content .time {
+    font-size: 0.70em;
+    color: #6c757d;
+    display: block;
+    margin-top: 0px;
+}
+.add-update-form {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    background-color: #f1f1f1;
+    padding: 0px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+}
+.add-update-form .form-control {
+    border-radius: 20px;
+    margin-right: 10px;
+    flex-grow: 1;
+}
+.add-update-form .btn {
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 0.875rem;
+}
+
+.agent-item:hover {
+    background-color: lightgray;
+    cursor: pointer;
+}
+
+p {
+    color: #202020;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+#help-icon {
+    font-size: 20px;
+    color: #007bff;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.tooltip-active [data-tippy-content] {
+    cursor: help;
+}
+
+.help-icon-container {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0px 20px;
+    font-size: 17px;
+    cursor: pointer;
+    align-items: center;
+}
+
+.help-icon-container.active .fa-question-circle {
+    display: none;
+}
+
+.help-icon-container.active .fa-times {
+    display: inline;
+    color: #ff0000;
+}
+
+.fa-times {
+    display: none;
+}
+.help-text {
+    margin-right: 10px; /* Adjust as needed */
+    color: #ddd;
+}
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Enable horizontal scrolling if table exceeds container width */
+    max-width: 1600px;
+    margin: 30px auto;
+    padding: 60px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+
+
+/* Optional: Adjust styles for smaller screens */
+@media (max-width: 768px) {
+    .table-container {
+        overflow-x: scroll;
+    }
+}

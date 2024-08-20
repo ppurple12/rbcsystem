@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up</title>
+   
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <a href="/" class="home-icon">
+            <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90">
+        </a>
+        <h1>IT Ticket Assignment</h1>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6 login-container">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="text-center">Enterprise Info</h4>
+            </div>
+            
+            <div class="card-body">
+                <div class="alert alert-danger" role="alert" th:if="${errorMessage}">
+                    <p th:text="${errorMessage}"></p>
+                </div>
+                
+                <form action="/enroll-enterprise" method="post">
+                    <div class="form-group">
+                        <label for="enterprise">Enterprise Name</label>
+                        <input type="text" class="form-control" id="enterprise" name="enterprise" placeholder="Enter enterprise name" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Continue</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

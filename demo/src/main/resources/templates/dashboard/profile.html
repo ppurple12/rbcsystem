@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .left-header {
+            display: flex;
+            align-items: center;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            height: 400px;
+            margin-top: 20px; /* Adjust as needed */
+        }
+        .profile-box {
+            width: 80%;
+            max-width: 600px; /* Adjust as needed */
+            background-color: #fff;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            vertical-align: top;
+            display: inline-block;
+            transition: border-color 0.3s ease;
+            margin-bottom: 30px;
+        }
+        .profile-box:hover {
+            border-color: #0056b3;
+        }
+        .profile-box h1 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #555;
+        }
+        .profile-box p {
+            font-size: 16px;
+            margin: 10px 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+   
+    <div class="header">
+        <div class="left-header">
+            <a href="/dashboard" class="home-icon"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Profile</h1>
+        </div>
+    </div>
+    <div class="container">
+        <div class="profile-box" onclick="window.location.href='/information';">
+            <!--<h1>User Profile</h1>-->
+            <p><strong>Information</strong>&nbsp;&nbsp; View information such as email, password and position</p>
+        </div>
+        <div class="profile-box" onclick="window.location.href='/website-issues';">
+            <!--<h1>User Profile</h1>-->
+            <p><strong>Web Issues </strong>&nbsp;&nbsp; Report a bug or give feedback</p>
+        </div>
+        <div class="profile-box" onclick="window.location.href='/logout';">
+            <!--<h1>User Profile</h1>-->
+            <p><strong>Log out</strong>&nbsp;&nbsp; Log out of account</p>
+        </div>
+        
+    </div>
+</body>
+</html>

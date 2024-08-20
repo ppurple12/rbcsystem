@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Change</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .agent-item:hover {
+            background-color: lightgray;
+            cursor: pointer;
+        }
+
+        p {
+            color: #202020;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon" data-tippy-content="Redirects to dashboard"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Agent Change</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <h2>Agent Change</h2>
+        <form action="/add" method="post" data-tippy-content="Can add an agent with associating roles to ticket">
+            <div class="form-group">
+                <label for="agentSelect">Select Agent:</label>
+                <select class="form-control" id="agentSelect" name="agentId">
+                    <option th:each="agent : ${allAgents}" th:value="${agent.id}" th:text="${agent.user.name}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="roleSelect">Select Role:</label>
+                <select class="form-control" id="roleSelect" name="roleId">
+                    <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.roleName}"></option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" onclick="return confirmSubmit()">Add Agent</button>
+        </form>
+        <hr>
+        <h3>Current Agents and Roles:</h3>
+        <ul id="agentList" data-tippy-content="Displays current agents and their according role">
+            <p th:each="agent, index : ${agents}" class="agent-item" th:data-agent-id="${agent.id}">
+                <span th:text="${agent.user.name}"></span> - 
+                <span th:if="${roles != null and index.index lt roles.size()}" th:text="${roles[index.index].roleName}"></span>
+                <button class="btn" th:attr="onclick='removeAgent(' + ${agent.id} + ')'" type="button">Remove</button>
+            </p>
+            <li th:unless="${agents != null and not #lists.isEmpty(agents)}">No agents found.</li>
+        </ul>
+    </div>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+        function removeAgent(agentId) {
+        if (confirm("Are you sure you want to remove this agent?")) {
+            console.log("Attempting to remove agent with ID:", agentId); // Log agent ID
+
+            fetch("/remove", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ agentId: agentId })
+            })
+            .then(response => {
+                console.log("Server response status:", response.status); // Log response status
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error("Network response was not ok: " + text);
+                    });
+                }
+                window.location.href = "/agent-change"
+            })
+            .catch(error => {
+                console.error("Error removing agent:", error); // Log error
+            });
+        }
+    }
+
+        function confirmSubmit() {
+            return confirm("Are you sure you want to submit?");
+        }
+    </script>
+</body>
+</html>

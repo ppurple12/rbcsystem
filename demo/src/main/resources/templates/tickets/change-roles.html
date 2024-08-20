@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise View</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="/style.css">
+    <html xmlns:th="http://www.thymeleaf.org"></html>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        .role-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .role-table th, .role-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .role-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .role-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin-bottom: 5px;
+        }
+
+        .role-link {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .role-link:hover {
+            color: #007bff;
+        }
+        .ticket-info-box {
+            width: calc(33.33% - 30px); /* Adjust the width to fit three boxes per row */
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* Add styling for the container holding the boxes */
+        .role-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between; /* To evenly distribute boxes in three columns */
+        }
+
+        .client-info-list {
+            list-style-type: none;
+            margin-top: 5px;
+            padding-left: 0;
+        }
+
+        .client-info-list li {
+            margin-bottom: 3px;
+            cursor: pointer; /* Add cursor pointer to indicate clickable */
+        }
+
+        .quantity-input {
+            margin-top: 10px;
+        }
+        .notification {
+            text-align: center; /* Center the text */
+        }
+
+        .notification-message {
+            color: red; /* Make the text red */
+            font-weight: bold; /* Make the text bold */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/tickets/adjust-tickets" class="home-icon" data-tippy-content="Directs towards the ticket mapping"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Role Mapping</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <th:block th:if="${roleEngine.isEmpty()}">
+            <div class="text-center">
+                <table>
+                    <tbody>
+                        <tr>
+                            <p class="agent"><strong>No current roles mapped</strong></p>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </th:block>
+        <th:block th:if="${not roleEngine.isEmpty()}">
+            <p>This is the current role assignment for this type of task</p>
+            <table class="role-table">
+                <thead>
+                    <tr>
+                        <th>Role Name</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Check if roleEngine is not empty and not null -->
+                    <th:block th:if="${roleEngine != null and not #lists.isEmpty(roleEngine)}">
+                        <!-- Iterate over the roleEngine map to display each role and its amount -->
+                        <tr th:each="entry : ${roleEngine}">
+                            <!-- Check if entry.key is not null -->
+                            <th:block th:if="${entry.key != null}">
+                                <!-- Retrieve the role name using the roleId -->
+                                <td th:text="${roles[entry.key-1].roleName}"></td>
+                            </th:block>
+                            <!-- Check if entry.value is not null -->
+                            <th:block th:if="${entry.value != null}">
+                                <!-- Display the amount of this role -->
+                                <td th:text="${entry.value}"></td>
+                            </th:block>
+                        </tr>
+                    </th:block>
+                </tbody>
+              
+            </table>
+            <p><strong>Current Estimated Time:</strong></p>
+            <p th:text="${task.estimatedTime}"></p>
+        </th:block>
+    </div>
+    <div class="container">
+        <p>Modify the role assignment and estimated time as necessary for your enterprise</p>
+        <div class="notification" th:if="${rolesExceedAgents}">
+            <p class="notification-message">The total number of roles exceeds the total number of agents. Please adjust the role quantities.</p>
+        </div>
+        <form id="role-selection-form">
+            <div class="card-header">
+                <h4 class="text-center">Modify Role Assignment</h4>
+            </div>
+            <div class="card-body role-container">
+                <!-- Loop through roles -->
+                <th:block th:each="role, iterStat : ${roles}">
+                    <div class="ticket-info-box"  data-tippy-content="Set amount of agents required for the necessary roles for the task">
+                        <h3 class="subject" th:text="${role.roleName}">Role</h3>
+                        <ul class="client-info-list">
+                            <!-- Client information will be populated here -->
+                        </ul>
+                        <div class="quantity-input">
+                            <label for="quantity" class="role-quantity-label">Quantity:</label>
+                            <!-- Populate the input field with the role quantity from the roleEngine map -->
+                            <input type="number" name="quantity" class="role-quantity-input" min="0" th:value="${roleEngine[role.id]}" />
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+            <!-- Add input field for estimated time -->
+            <div class="text-center">
+                <h3 class="subject">Estimated Time</h3>
+                <div class="quantity-input" data-tippy-content="Sets estimated time for the task to be complete. 0.25 is equivalent to 15 minutes">
+                    <label for="estimated-time" class="role-quantity-label">Estimated Time (hours):</label>
+                    <input type="number" name="estimated-time" id="estimated-time" min="0.25" step="0.25" th:value="${estimatedTime != null ? estimatedTime : task.estimatedTime}">
+                </div>
+            </div>
+            <p></p>
+            <div class="text-center">
+                <button type="button" id="submit-button" class="btn btn-secondary">Submit</button>
+            </div>
+        </form>
+    </div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var agentAmt = /*[[${agentAmt}]]*/ 0; // Provide a default value if agentAmt is not available
+        /*]]>*/
+    </script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+
+        $(document).ready(function() {
+            // Handle form submission
+            $('#submit-button').click(function() {
+                if (confirmSubmit()) {
+                    var roleAmounts = [];
+                    var totalRoles = 0; // Variable to store the total number of roles
+                    var atLeastOneRole = false; // Variable to check if at least one role is greater than 0
+
+                    $('.role-quantity-input').each(function() {
+                        var amount = parseFloat($(this).val()); // Use parseFloat to ensure decimal values
+                        if (isNaN(amount)) {
+                            amount = 0; // Set default value to 0 if NaN
+                        }
+                        totalRoles += amount; // Add the current role amount to the totalRoles
+                        if (amount > 0) {
+                            atLeastOneRole = true; // Set the flag to true if any role amount is greater than 0
+                        }
+                        roleAmounts.push(amount);
+                    });
+
+                    var estimatedTime = parseFloat($('#estimated-time').val()); // Use parseFloat for estimated time
+                    if (isNaN(estimatedTime)) {
+                        estimatedTime = 0.25; // Set default value to 0.25 if NaN
+                    }
+
+                    // Check if the totalRoles exceeds the total number of agents
+                    if (totalRoles > agentAmt) {
+                        console.log("Total roles:", totalRoles);
+                        alert("The total number of roles exceeds the total number of agents. Please adjust the role quantities.");
+                        return false; // Prevent form submission
+                    }
+
+                    // Check if at least one role is greater than 0
+                    if (!atLeastOneRole) {
+                        alert("At least one role quantity must be greater than 0.");
+                        return false; // Prevent form submission
+                    }
+
+                    // Send role amounts and estimated time to the server
+                    $.ajax({
+                        type: 'POST',
+                        url: '/change-roles',
+                        data: JSON.stringify({ roleAmounts: roleAmounts, estimatedTime: estimatedTime }),
+                        contentType: 'application/json',
+                        success: function(data) {
+                            console.log("Role amounts submitted successfully.");
+                            window.location.href = "/tickets/adjust-tickets"; // Redirect to the visualization page
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error submitting role amounts:", error);
+                            // Handle error if needed
+                        }
+                    });
+                }
+            });
+
+            // Function to confirm form submission
+            function confirmSubmit() {
+                return confirm("Are you sure you want to submit?");
+            }
+        });
+    </script>
+</body>
+</html>

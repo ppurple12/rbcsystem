@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+          html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Main container styling to take full height */
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 10vh;
+            max-width: 1200px; /* Adjust the width as needed */
+            margin: 10 auto; /* Center the container */
+        }
+        .ticket-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Center the ticket boxes horizontally */
+            gap: 20px; /* Add some space between ticket boxes */
+        }
+        .ticket-flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Adjust the gap as needed */
+            justify-content: center; /* Align items to the start */
+        }
+        
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon" data-tippy-content="Redirects to dashboard"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Tickets</h1>
+        </div>
+    </div>
+    
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="card-header bg-primary text-white">
+                <h4 class="text-center">Tickets</h4>
+                <p>Below you'll find all the active tickets</p>
+            </div>
+            <div class="card-body">
+                <div class="ticket-container">
+                    <div th:if="${activeTickets != null}" class="ticket-flex-container">
+                        <div th:each="ticket, iterStat : ${activeTickets}">
+                            <div class="ticket-item" data-tippy-content="Provides a detailed view of the selected ticket">
+                                <div th:with="ticketMap=${ticketMaps[ticket.id]}">
+                                    <!-- Check the ticket status and apply appropriate class and content -->
+                                    <div class="ticket-info-box" th:if="${ticketMap.ticketStatus.name() == 'NEW'}">
+                                        <div class="new-ticket">
+                                    </div>
+                                </div>
+                                <a th:href="@{'/tickets/' + ${ticket.id}}" class="ticket-link">
+                                    <div class="ticket-info-box">
+                                        <h3 class="subject" th:text="${ticket.subject}">Subject Line</h3>
+                                        <p class="client">Client: <span th:text="${ticket.sender.name}">Client Name</span></p>
+                                        <p class="time">
+                                            Completion: <span th:text="${ticket.formatTime()}"></span>
+                                        </p>
+                                        <!--  <p class="time">Estimated Time: <span th:text="${agent.totalEstimatedTime}">0</span> hours</p> -->
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${activeTickets == null || activeTickets.isEmpty()}">
+                        <p>No active tickets</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <html xmlns:th="http://www.thymeleaf.org"></html>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Style the form container */
+        .form-container {
+            width: 100%; /* Make the form container responsive */
+            max-width: 400px; /* Limit the maximum width */
+            margin: 0 auto; /* Center the form horizontally */
+            padding: 20px; /* Add some padding */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+            border-radius: 5px; /* Add rounded corners */
+        }
+
+        /* Style form elements */
+        .form-container form {
+            display: flex; /* Use flexbox to align form elements */
+            flex-direction: column; /* Align form elements vertically */
+            align-items: center; /* Center form elements horizontally */
+        }
+
+        /* Style form inputs */
+        .form-container form input,
+        .form-container form select,
+        .form-container form textarea {
+            width: 100%; /* Make inputs fill the container */
+            padding: 10px; /* Add some padding */
+            margin: 5px 0; /* Add space between form elements */
+            border: 1px solid #ccc; /* Add a border */
+            border-radius: 3px; /* Add rounded corners */
+            box-sizing: border-box; /* Ensure padding doesn't affect width */
+        }
+
+        /* Style form labels */
+        .form-container form label {
+            margin-bottom: 5px; /* Add space below labels */
+            font-weight: bold; /* Make labels bold */
+        }
+
+        /* Style form buttons */
+        .form-container form button {
+            width: 100%; /* Make buttons fill the container */
+            padding: 10px; /* Add some padding */
+            margin-top: 10px; /* Add space above buttons */
+            background-color: #007bff; /* Set button background color */
+            color: #fff; /* Set text color to white */
+            border: none; /* Remove border */
+            border-radius: 3px; /* Add rounded corners */
+            cursor: pointer; /* Add pointer cursor on hover */
+            transition: background-color 0.3s; /* Smooth transition */
+        }
+
+        /* Style form buttons on hover */
+        .form-container form button:hover {
+            background-color: #0056b3; /* Darken the background color */
+        }
+
+        /* Style error messages */
+        .error-message {
+            color: #dc3545; /* Set text color to red */
+            font-size: 20px; /* Set font size */
+            margin-top: 5px; /* Add space above error messages */
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/categories" class="home-icon" data-tippy-content="Return to category options"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>IT Ticket Assignment</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <div class="form-container">
+            <div class="text-center">
+                <p th:if="${error}" class="error-message"><strong th:text="${error}"></strong></p>
+            </div>
+            <form id="categoryForm" action="/add-categories" method="POST" onsubmit="return validateForm()">
+                <label for="category" >Select an existing category:</label>
+                <select id="category" name="category"  data-tippy-content="Select a existing category if one applies">
+                    <option value="">--Select a category--</option>
+                    <option th:each="category : ${categories}" th:value="${category}" th:text="${category}"></option>
+                </select>
+                <br>
+                <label for="newCategory">Or add a new category:</label>
+                <input type="text" id="newCategory" name="newCategory"  data-tippy-content="Add a new category if need be">
+                <br>
+                <label for="subcategory">Add Subcategory:</label>
+                <input type="text" id="subcategory" name="subcategory" required  data-tippy-content="Add the subcategory here">
+                <br>
+                <button type="submit">Next</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+        function validateForm() {
+            var categoryDropdown = document.getElementById("category");
+            var newCategoryInput = document.getElementById("newCategory");
+
+            // Check if either the category dropdown has a value selected or newCategoryInput is not empty
+            if (categoryDropdown.value === "" && newCategoryInput.value.trim() === "") {
+                alert("Please select an existing category or enter a new one.");
+                return false; // Prevent form submission
+            }
+            return true; // Allow form submission
+        }
+    </script>
+</body>
+</html>

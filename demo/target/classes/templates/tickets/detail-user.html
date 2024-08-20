@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+    
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon" data-tippy-content="Returns to dashboard"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Ticket Details</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="card col-md-8">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center">Ticket Details</h4>
+                </div>
+                
+                <div class="card-body" data-tippy-content="Provides information of your ticket">
+                    <h3 th:text="${ticket.subject}">Subject</h3>
+                    <p class="client">Agents: 
+                        <div th:each="ticketMap : ${ticket.ticketMaps}">
+                            <!-- Display the agent's name -->
+                            <div>
+                                <span th:text="${ticketMap.agent.user.name}"></span>
+                                <!-- Check if role and roleName are not null -->
+                                <span>- <span th:text="${ticketMap.role != null ? ticketMap.role.roleName : 'No Role Assigned'}"></span></span>
+                            </div>
+                        </div>
+                    </p>
+                    <div th:if="${ticket.comments != null and not #strings.isEmpty(ticket.comments)}">
+                        <p>Comments: <span th:text="${ticket.comments}">Ticket Description</span></p>
+                    </div>
+
+                    <div th:text="'Created ' + ${ticket.formattedCreatedAt}"></div>
+                    <div th:text="'Last Updated ' + ${ticket.formattedUpdatedAt}"></div><br>
+                      <!-- Form for completing the ticket -->
+                    <div style="text-align: center;">
+                        <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+                    </div>
+                </div>
+    
+            </div>
+            
+        </div>
+      
+    </div>
+   
+    <div class="container">
+        <p> If the issue has resolved itself or a solution was found without agent aid, please mark the ticket as complete.</p>
+        <div class="d-flex justify-content-center">
+            <form action="/complete-ticket" method="post" data-tippy-content="Allows the completion of ticket if the case arises">
+                <!-- Hidden input to send the ticket ID to the server -->
+                <input type="hidden" name="ticketId" th:value="${ticket.id}">
+                <!-- Submit button to complete the ticket -->
+                <button type="submit" class="btn btn-success">Complete Ticket</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

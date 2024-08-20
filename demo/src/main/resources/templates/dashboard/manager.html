@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <!-- Your custom stylesheet -->
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a class="home-icon"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Dashboard</h1>
+        </div>
+        <div class="navbar">
+            <a href="/categories" data-tippy-content="Map tasks to categories">Task Mapping</a>
+            <a href="/tickets/adjust-tickets" data-tippy-content="Adjust ticket assignments">Ticket Mapping</a>
+            <a href="/enterprise-view" data-tippy-content="View all members of your organization">Enterprise View</a>
+            <a href="/dashboard/profile" data-tippy-content="View and edit your profile">Profile</a>
+        </div>
+    </div>
+
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+
+    <!-- Notification for overdue tickets -->
+    <div th:if="${areThereOverdueTickets || areThereUnassignedTickets}" class="notification">
+        <div class="container">
+            <div style="text-align: center;">
+                <span th:if="${areThereOverdueTickets}">
+                    <a th:href="@{/overdue-tickets}" class="btn btn-warning" data-tippy-content="Directs to all tickets that haven't been updated in a week">
+                        Overdue Tickets
+                    </a>
+                </span>
+                <span th:if="${areThereUnassignedTickets}">
+                    <a th:href="@{/unassigned-tickets}"  class="btn btn-warning" data-tippy-content="Directs to all tickets that haven't been assigned yet">
+                        Unassigned Tickets
+                    </a>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="card-header bg-primary text-white">
+                <h4 class="text-center">Agents</h4>
+                <p>Below you'll find all the agents as well as their amount of tickets</p>
+            </div>
+            <div class="ticket-container">
+                <div th:if="${agents != null}" class="ticket-flex-container">
+                    <div th:each="agent, iterStat : ${agents}" th:if="${iterStat.index < 4}">
+                        <a th:href="@{'/agents/' + ${agent.id}}" class="ticket-link" data-tippy-content="Leads to a view of the agent in more detail">
+                            <div class="ticket-info-box">
+                                <h3 class="agent" th:text="${agent.user.name}">Agent Name</h3>
+                                <p class="ticket-count"><span th:text="${agent.ticketCount}">0</span></p>
+                            </div>
+                        </a>
+                    </div>
+                    <!-- IF AGENT AMOUNT IS MORE THAN 4, THIS SHOULD SHOW -->
+                    <div class="card-body" th:if="${agents.size() > 4}">
+                        <a href="/all-agents" class="view-detail" data-tippy-content="Allows a view of all agents under your authority">View all agents...</a>
+                    </div>
+                </div>
+                <div th:if="${agents == null || agents.isEmpty()}">
+                    <p>No active agents</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="button-container" th:if="${ticketQueue == true}">
+                <p><strong>Tickets are waiting to be assigned</strong></p>
+                <a href="/agent-mapping" class="btn" data-tippy-content="Views all tickets that have been requested. This will lead to assigning all the tickets to agents">View Tickets</a>
+            </div>
+            <div th:if="${ticketQueue== false}">
+                <p>No new tickets</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Make a task</h2>
+        <p>Make your own ticket or project where you can pick the agents, the priority and the roles yourself if wanted</p>
+        <div class="button-container">
+            <a href="/manager-ticket" class="btn" data-tippy-content="Starts a ticket or project">Start a Ticket</a>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

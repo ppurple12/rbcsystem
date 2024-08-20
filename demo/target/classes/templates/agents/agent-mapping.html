@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Assignment Visualization</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .highlighted {
+            border: 3px solid red;
+        }
+        .optimal {
+            font-weight: bold;
+        }
+        .disabled-row {
+            background-color: #636262; /* Light gray */
+            pointer-events: none; /* Disable interaction */
+            opacity: 0.6; /* Optional: slightly reduce opacity to visually indicate non-interactivity */
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+        }
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            font-weight: normal;
+        }
+        .tooltip {
+            position: relative;
+            cursor: pointer; /* Change cursor to pointer on hover */
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: max-content;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 5px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -90px; /* Adjust this value as needed */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .message-container {
+            margin: 20px 0;
+            text-align: center;
+            display: none; /* Initially hidden */
+        }
+        .info-message {
+            font-size: 16px;
+            color: #333;
+            background-color: #f9f9f9; /* Light background for better readability */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .info-message a {
+            color: #007bff; /* Link color */
+            text-decoration: underline;
+        }
+        .info-message a:hover {
+            color: #0056b3; /* Darker color on hover */
+        }
+    </style>
+</head>
+<body>
+    <!-- Existing content -->
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon" data-tippy-content="Redirects to dashboard">
+                <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90">
+            </a>
+            <h1>Assignment Visualization</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="table-container">
+        <p>Pick who you'd like to assign the tasks to. Bolded entries are the optimal choices considering the agents' busyness and skillsets.</p>
+        <form id="highlighted-values-form" method="post" action="/submit-agent-mapping">
+            <input type="hidden" id="roleAmt" th:value="${roleAmt}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ticket</th>
+                        <th th:each="agent : ${agents}" class="tooltip">
+                            <span th:text="${agent.user.name}"></span>
+                            <span class="tooltiptext">
+                                <strong>Amount: </strong> <span th:text="${agent.getTicketCount}"></span> tickets<br>
+                                <strong>Estimated Time: </strong> <span th:text="${agent.getTotalEstimatedTime}"></span> hours<br>
+                            </span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody data-tippy-content="Grayed out rows are tickets that cannot be assigned due to role constraints. These will need to be assigned manually. Select agents for tickets by clicking their names.">
+                    <tr th:each="ticket, ticketIterStat : ${tickets}"
+                    th:classappend="${rowIndex[ticketIterStat.index] == 1} ? 'disabled-row' : ''" >
+                        <td class="tooltip">
+                            <span th:text="${ticket.subject}"></span>
+                            <span class="tooltiptext">
+                                <strong>Client:</strong> <span th:text="${ticket.sender.name}"></span><br>
+                                <strong>Task Category:</strong>
+                                <span th:if="${ticket.taskId != null}">
+                                    <span th:text="${@taskRepository.findById(ticket.taskId).category}"></span> - 
+                                    <span th:text="${@taskRepository.findById(ticket.taskId).subcategory}"></span><br>
+                                </span>
+                                <span th:unless="${ticket.taskId != null}">
+                                    N/A
+                                </span>
+                                <strong>Description:</strong> <span th:text="${ticket.comments}"></span><br>
+                                <strong>Priority:</strong> <span th:text="${ticket.priority}"></span><br>
+                            </span>
+                        </td>
+                        <td th:each="agent, agentIterStat : ${agents}"
+                            th:data-agent-id="${agent.id}"
+                            th:text="${agentQualifications[ticketIterStat.index][agentIterStat.index]}" 
+                            th:classappend="${assignmentMatrix[ticketIterStat.index][agentIterStat.index] == 1} ? 'optimal highlighted' : ''"
+                            onclick="toggleHighlight(this)">
+                            <div style="width: 30px; height: 30px; border-radius: 50%; background-color: transparent; margin: auto;">
+                                &nbsp;
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+        </form>
+    </div>
+    
+    <!-- Message container -->
+    <div class="message-container" id="message-container">
+        <p class="info-message">Grayed out tickets are not assignable at this time. They can be manually assigned from the <a href="/unassigned-tickets">Unassigned Tickets</a> page.</p>
+    </div>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const messageContainer = document.getElementById('message-container');
+            const roleAmtElement = document.getElementById('roleAmt');
+            
+            let roleAmt = [];
+    
+            if (roleAmtElement) {
+                try {
+                    roleAmt = JSON.parse(roleAmtElement.value || "[]");
+                    console.log("Parsed roleAmt:", roleAmt);
+                } catch (e) {
+                    console.error("Error parsing roleAmt value:", e);
+                }
+            }
+    
+            function toggleHighlight(cell) {
+                const isOptimal = cell.classList.contains('optimal');
+                if (isOptimal) {
+                    cell.classList.toggle('highlighted');
+                }
+            }
+    
+            document.querySelectorAll('tbody td').forEach(cell => {
+                cell.addEventListener('click', function () {
+                    toggleHighlight(this);
+                });
+            });
+
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+
+    
+            if (roleAmt.length === 0) {
+                alert("No agents are available for assignment.");
+                document.querySelector('button[type="submit"]').disabled = true;
+            }
+    
+            document.getElementById('highlighted-values-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+    
+                const rows = document.querySelectorAll('tbody tr');
+                let validSubmission = true;
+                let rowHighlightedAgents = [];
+    
+                rows.forEach((row, rowIndex) => {
+                    if (row.classList.contains('disabled-row')) {
+                        return; // Skip disabled rows
+                    }
+    
+                    const ticketSubject = row.querySelector('.tooltip span:first-child').innerText;
+                    const highlightedCells = row.querySelectorAll('.highlighted');
+                    const highlightedAgentIds = [];
+    
+                    highlightedCells.forEach(cell => {
+                        const agentId = parseInt(cell.getAttribute('data-agent-id'), 10);
+                        if (!isNaN(agentId) && !highlightedAgentIds.includes(agentId)) {
+                            highlightedAgentIds.push(agentId);
+                        }
+                    });
+    
+                    if (highlightedAgentIds.length !== roleAmt[rowIndex]) {
+                        alert(`Ticket ${ticketSubject} requires exactly ${roleAmt[rowIndex]} highlighted cells.`);
+                        validSubmission = false;
+                    }
+    
+                    rowHighlightedAgents.push(highlightedAgentIds);
+                });
+    
+                if (!validSubmission) return;
+    
+                const formattedValues = rowHighlightedAgents;
+                console.log("Submitting:", formattedValues);
+    
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "/submit-agent-mapping", true);
+                xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            window.location.href = "/dashboard";
+                        } else {
+                            console.error("Failed to submit data:", xhr.statusText);
+                        }
+                    }
+                };
+                xhr.send(JSON.stringify(formattedValues));
+            });
+        });
+    </script>
+</body>
+</html>

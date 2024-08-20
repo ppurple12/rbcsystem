@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Stats</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata"></script>
+    <style>
+        .container {
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            height: 70vh; /* Increased height for better visualization */
+            background-color: #f8f9fa; /* Light background for the whole container */
+        }
+
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            height: 400px; /* Adjust the height as needed */
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon" data-tippy-content="Returns to dashboard"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Change Performance</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <p>Feel free to increment and decrement agent abilities as required. Press submit to confirm your changes</p>
+        <div class="agent-info">
+            <h4 th:text="${loggedInAgent.user.name}"></h4>
+            <a th:text="'Position: ' + ${loggedInAgent.user.position}"></a>
+        </div>
+        
+        <div class="button-container">
+            <button type="button" class="btn" id="incrementAllStats" data-tippy-content="Increments all active roles by 0.05">Increment All Stats</button>
+        </div>
+        <form id="abilitiesForm" data-tippy-content="A canvas of the current agent's qualification. Drag up or down to scale the individual role's qualification">
+            <!-- Create a canvas element for the chart -->
+            <div>
+                <canvas id="myChart"></canvas>
+            </div>
+        
+            <div>
+                <button type="submit" class="btn" onclick="return confirmSubmit()">Submit</button>
+            </div>
+        </form>
+    </div>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var abilities = /*[[${abilities}]]*/ [];
+        var agentId = /*[[${loggedInAgent.id}]]*/ 'default-value-if-undefined';
+        var labels = /*[[${roles}]]*/ []; // Use roles as labels
+    
+        // Round abilities to two decimal places and filter out zeros
+        abilities = abilities.map(ability => Math.round(ability * 100) / 100);
+        var filteredData = abilities.map((ability, index) => ({ ability, label: labels[index] })).filter(item => item.ability !== 0);
+    
+        var filteredLabels = filteredData.map(item => item.label);
+        var filteredAbilities = filteredData.map(item => item.ability);
+    
+        var ctx = document.getElementById('myChart').getContext('2d');
+    
+        // Create gradient for the bars
+        var gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(75,192,192,1)');
+        gradient.addColorStop(1, 'rgba(153,102,255,1)');
+    
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: filteredLabels,
+                datasets: [{
+                    label: 'Abilities',
+                    data: filteredAbilities,
+                    backgroundColor: gradient,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                        max: 1,
+                        ticks: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    dragData: {
+                        showTooltip: true,
+                        onDrag: function (e, datasetIndex, index, value) {
+                            e.target.style.cursor = 'grabbing';
+                        },
+                        onDragEnd: function (e, datasetIndex, index, value) {
+                            e.target.style.cursor = 'default';
+                        },
+                        dragX: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                var value = context.raw.toFixed(2); // Format tooltip values to two decimal places
+                                return value;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: false // Hide the legend
+                    }
+                }
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+        function confirmSubmit() {
+            return confirm("Are you sure you want to submit?");
+        }
+
+        document.getElementById('incrementAllStats').addEventListener('click', function() {
+            // Get the updated abilities data from the chart
+            var updatedAbilities = myChart.data.datasets[0].data.map(ability => parseFloat(ability.toFixed(2)));
+            
+            // Increment each ability by 0.05 if it's not already at the maximum value of 1
+            for (var i = 0; i < updatedAbilities.length; i++) {
+                if (updatedAbilities[i] < 1) {
+                    updatedAbilities[i] += 0.05;
+                }
+            }
+
+            // Refresh the chart with the updated abilities
+            myChart.data.datasets[0].data = updatedAbilities;
+            myChart.update(); // Call update() directly here
+        });
+                
+        document.getElementById('abilitiesForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Get the updated abilities data from the chart
+            var updatedAbilities = myChart.data.datasets[0].data.map(ability => parseFloat(ability.toFixed(2)));
+            console.log('Updated Abilities:', updatedAbilities);
+
+            // Send the updated abilities to the backend
+            fetch('/update-abilities/' + agentId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    updatedAbilities: updatedAbilities
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl; // Perform the redirect
+                }
+            })
+        });
+        /*]]>*/
+    </script>
+
+</body>
+</html>

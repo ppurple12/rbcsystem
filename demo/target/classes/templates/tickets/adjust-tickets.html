@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category View</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light.css">
+    <link rel="stylesheet" href="/style.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin-bottom: 5px;
+        }
+
+        .category-link {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .category-link:hover {
+            color: #007bff;
+        }
+
+        .subcategory-info-list {
+            list-style-type: none;
+            margin-top: 5px;
+            padding-left: 0;
+        }
+
+        .subcategory-info-list li {
+            margin-bottom: 3px;
+            cursor: pointer; /* Add cursor pointer to indicate clickable */
+            color: #333;
+        }
+
+        .subcategory-info-list li:hover {
+            color: #007bff; /* Change color to blue on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon" data-tippy-content="Directs towards the dashboard"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>Category View</h1>
+        </div>
+    </div>
+    <div class="help-icon-container" id="help-icon-container">
+        <span class="help-text">Need help?</span>
+        <i class="fas fa-question-circle" id="help-icon" aria-hidden="true"></i>
+        <i class="fas fa-times" id="close-icon" aria-hidden="true"></i>
+    </div>
+    <div class="container">
+        <div class="card-header">
+            <h4 class="text-center">View by category</h4>
+        </div>
+        <div class="card-body" data-tippy-content="View category mappings and change the roles on click">
+            <ul id="category-list">
+                <!-- Populate categories here -->
+                <li th:each="category : ${categories}">
+                    <a href="#" class="category-link" th:attr="data-category=${category}">
+                        <div class="ticket-info-box">
+                            <h3 class="subject" th:text="${category}">Category</h3>
+                            <ul class="subcategory-info-list">
+                                <!-- Subcategory information will be populated here -->
+                            </ul>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let tooltips = [];
+            const helpIconContainer = document.getElementById('help-icon-container');
+            const helpIcon = document.getElementById('help-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            helpIcon.addEventListener('click', function () {
+                if (helpIconContainer.classList.contains('active')) {
+                    tooltips.forEach(instance => instance.destroy());
+                    tooltips = [];
+                    document.body.classList.remove('tooltip-active');
+                    helpIconContainer.classList.remove('active');
+                } else {
+                    document.body.classList.add('tooltip-active');
+                    helpIconContainer.classList.add('active');
+                    tooltips = tippy('[data-tippy-content]', {
+                        theme: 'light',
+                        placement: 'right',
+                        arrow: true,
+                        appendTo: document.body
+                    });
+                }
+            });
+
+            closeIcon.addEventListener('click', function () {
+                tooltips.forEach(instance => instance.destroy());
+                tooltips = [];
+                document.body.classList.remove('tooltip-active');
+                helpIconContainer.classList.remove('active');
+            });
+        });
+        $(document).ready(function() {
+            // Function to clear subcategory lists
+            function clearSubcategoryLists() {
+                $('.subcategory-info-list').remove();
+            }
+
+            // Fetch subcategories for a category
+            $('#category-list').on('click', '.category-link', function(event) {
+                event.preventDefault();
+                var category = $(this).data('category');
+                clearSubcategoryLists(); // Clear existing subcategory lists
+                $.get("/subcategories", { category: category }, function(data) {
+                    var subcategoryList = $('<ul>').addClass('subcategory-info-list');
+                    data.forEach(function(subcategory) {
+                        var subcategoryItem = $('<li>').text(subcategory);
+                        subcategoryItem.click(function() {
+                            // Handle subcategory click event here
+                            var clickedSubcategory = $(this).text();
+                            console.log('Clicked subcategory:', clickedSubcategory);
+                            // Send POST request with category and subcategory strings
+                            $.post("/process-subcategory", { category: category, subcategory: clickedSubcategory }, function(response) {
+                                // Handle response if needed
+                                console.log('Server response:', response);
+                                // Redirect to the home page
+                                window.location.href = "/change-roles"; // Redirect with taskId
+                            });
+                        });
+                        subcategoryList.append(subcategoryItem);
+                    });
+                    $(event.target).closest('.ticket-info-box').append(subcategoryList);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

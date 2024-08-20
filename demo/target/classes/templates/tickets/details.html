@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+   
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+    
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon">🏠</a>
+            <h1>IT Ticket Assignemnt</h1>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="card col-md-8">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="text-center">Ticket Details</h4>
+                </div>
+                <div class="card-body">
+                    <h3 th:text="${ticket.subject}">Subject</h3>
+                    <p>Client: <span th:text="${ticket.sender.name}">Client Name</span></p>
+                    <p>Comments: <span th:text="${ticket.comments}">Ticket Description</span></p>
+                    <p class="client">Agents: 
+                        <div th:each="ticketMap : ${ticket.ticketMaps}">
+                            <!-- Display the agent's name -->
+                            <div>
+                                <span th:text="${ticketMap.agent.user.name}"></span>
+                                <span>- <span th:text="${ticketMap.role.roleName}"></span>
+                            </div>
+                        </div>
+                    </p>
+                    <!-- Centering the button using inline styles -->
+                    <div style="text-align: center;">
+                        <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="d-flex justify-content-center">
+            <form action="/complete-ticket" method="post">
+                <!-- Hidden input to send the ticket ID to the server -->
+                <input type="hidden" name="ticketId" th:value="${ticket.id}">
+                <!-- Submit button to complete the ticket -->
+                <button type="submit" class="btn btn-success">Complete Ticket</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

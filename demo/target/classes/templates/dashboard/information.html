@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Styles for header, container, and profile box remain the same */
+
+        /* Style profile box content */
+        .profile-box h2 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #007bff;
+        }
+
+        .profile-box p {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>User Profile</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="profile-box">
+            <h2>User Information</h2>
+            <p><strong>Name:</strong> [[${user.name}]]</p>
+            <p><strong>Email:</strong> [[${user.email}]]</p>
+            <p><strong>Department:</strong> [[${user.department}]]</p>
+            <p><strong>Position:</strong> [[${user.position}]]</p>
+        </div>
+
+       
+    </div>
+</body>
+</html>

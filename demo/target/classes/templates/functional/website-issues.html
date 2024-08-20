@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<he<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Issues</title>
+    <html xmlns:th="http://www.thymeleaf.org"></html>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="home-icon"> <img src="/ticket-assignment-logo.png" alt="Website logo" width="150" height="90"></a>
+            <h1>IT Ticket Assignemnt</h1>
+        </div>
+    </div>
+    <div class="container">
+        <div class="form-container">
+            <form action="/submit-issue" method="post">
+                <label for="issue-type">Issue Type:</label>
+                <select name="issue-type" id="issue-type">
+                    <option value="bug">Bug</option>
+                    <option value="feedback">Feedback</option>
+                </select>
+                <br>
+                <label for="description">Description:</label><br>
+                <textarea id="description" name="description" rows="4" cols="50"></textarea>
+                <br>
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+    </div>
+</body>
+</html>

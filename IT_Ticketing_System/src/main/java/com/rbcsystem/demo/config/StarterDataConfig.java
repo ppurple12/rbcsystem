@@ -19,7 +19,7 @@ public class StarterDataConfig {
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/all_users?verifyServerCertificate=true&useSSL=true&requireSSL=true");
         dataSource.setUsername("Evanw");
-        dataSource.setPassword("Doorn*bb12");
+        dataSource.setPassword(DB_PASSWORD);
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
 
         return dataSource;

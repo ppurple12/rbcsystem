@@ -27,4 +27,3 @@ The algorithm evaluates each technician’s suitability based on their current w
 3. **Tooling**: Utilizes Google OR-Tools to solve a combinatorially complex problem
 4. **Innovation**: First known application of GRAABD-WS in IT ticket management
 
----
